@@ -1,7 +1,10 @@
-﻿namespace SimplCommerce.Module.SampleData.Services
+﻿using System.Threading.Tasks;
+using SimplCommerce.Module.SampleData.Areas.SampleData.ViewModels;
+
+namespace SimplCommerce.Module.SampleData.Services
 {
     public interface ISampleDataService
     {
-        void ResetToSampleData();
+        Task ResetToSampleData(SampleDataOption model);
     }
 }

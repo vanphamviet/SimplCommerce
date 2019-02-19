@@ -5,14 +5,15 @@
         .controller('ProductWidgetFormCtrl', ProductWidgetFormCtrl);
 
     /* @ngInject */
-    function ProductWidgetFormCtrl($state, $stateParams, productWidgetService, translateService) {
+    function ProductWidgetFormCtrl($state, $stateParams, productWidgetService, categoryService, translateService) {
         var vm = this;
         vm.translate = translateService;
         vm.widgetZones = [];
         vm.sorts = [];
-        vm.widgetInstance = { widgetZoneId: 1, setting: { numberOfProducts: 4 }, publishStart: new Date() };
+        vm.widgetInstance = { widgetZoneId: 1, displayOrder: 0, setting: { numberOfProducts: 4 }, publishStart: new Date() };
         vm.widgetInstanceId = $stateParams.id;
         vm.isEditMode = vm.widgetInstanceId > 0;
+        vm.categories = [];
 
         vm.datePickerPublishStart = {};
         vm.datePickerPublishEnd = {};
@@ -49,6 +50,10 @@
         function init() {
             productWidgetService.getWidgetZones().then(function (result) {
                 vm.widgetZones = result.data;
+            });
+
+            categoryService.getCategories().then(function (result) {
+                vm.categories = result.data;
             });
 
             productWidgetService.getProductWidgetAvailableOrderBy().then(function (result) {

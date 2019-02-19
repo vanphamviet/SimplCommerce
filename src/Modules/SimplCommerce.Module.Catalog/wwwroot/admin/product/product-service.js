@@ -7,6 +7,7 @@
     /* @ngInject */
     function productService($http, Upload) {
         var service = {
+            quickSearchProducts: quickSearchProducts,
             getProducts: getProducts,
             createProduct: createProduct,
             editProduct: editProduct,
@@ -16,9 +17,15 @@
             getProductOptions: getProductOptions,
             getProduct: getProduct,
             changeStatus: changeStatus,
-            deleteProduct: deleteProduct
+            deleteProduct: deleteProduct,
+            getTaxClasses: getTaxClasses,
+            getDefaultTaxClass: getDefaultTaxClass
         };
         return service;
+
+        function quickSearchProducts(name) {
+            return $http.get('api/products/quick-search?name=' + name);
+        }
 
         function getProduct(id) {
             return $http.get('api/products/' + id);
@@ -75,6 +82,14 @@
 
         function deleteProduct(product) {
             return $http.delete('api/products/' + product.id, null);
+        }
+
+        function getTaxClasses() {
+            return $http.get('api/tax-classes');
+        }
+
+        function getDefaultTaxClass() {
+            return $http.get('api/tax-classes/default');
         }
     }
 })();

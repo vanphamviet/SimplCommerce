@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +18,18 @@ namespace SimplCommerce.Module.Core.Data
     {
         public SimplDbContext(DbContextOptions options) : base(options)
         {
+        }
+
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            ValidateEntities();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            ValidateEntities();
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -35,6 +49,24 @@ namespace SimplCommerce.Module.Core.Data
             RegisterCustomMappings(modelBuilder, typeToRegisters);
         }
 
+        private void ValidateEntities()
+        {
+            var modifiedEntries = ChangeTracker.Entries()
+                    .Where(x => (x.State == EntityState.Added || x.State == EntityState.Modified));
+
+            foreach (var entity in modifiedEntries)
+            {
+                if (entity.Entity is ValidatableObject validatableObject)
+                {
+                    var validationResults = validatableObject.Validate();
+                    if (validationResults.Any())
+                    {
+                        throw new ValidationException(entity.Entity.GetType(), validationResults);
+                    }
+                }
+            }
+        }
+
         private static void RegisterConvention(ModelBuilder modelBuilder)
         {
             foreach (var entity in modelBuilder.Model.GetEntityTypes())
@@ -45,6 +77,11 @@ namespace SimplCommerce.Module.Core.Data
                     var tableName = string.Concat(nameParts[2], "_", entity.ClrType.Name);
                     modelBuilder.Entity(entity.Name).ToTable(tableName);
                 }
+            }
+
+            foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+            {
+                relationship.DeleteBehavior = DeleteBehavior.Restrict;
             }
         }
 

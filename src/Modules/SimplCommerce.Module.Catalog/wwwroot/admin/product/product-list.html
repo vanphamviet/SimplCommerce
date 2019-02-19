@@ -4,7 +4,7 @@
             <h2>{{::vm.translate.get('Products')}}</h2>
         </div>
         <div class="col-md-4 text-right">
-            <a ui-sref="product-create" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span>{{::vm.translate.get('Create Product')}}</a>
+            <a ui-sref="product-create" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> {{::vm.translate.get('Create Product')}}</a>
         </div>
     </div>
 </div>
@@ -18,7 +18,7 @@
             <th class="text-center">{{::vm.translate.get('Is Featured')}}</th>
             <th class="text-center">{{::vm.translate.get('Is Allowed To Order')}}</th>
             <th class="text-center">{{::vm.translate.get('Is Called For Pricing')}}</th>
-            <th>{{::vm.translate.get('Stock Quantity')}}</th>
+            <th class="text-right">{{::vm.translate.get('Stock Quantity')}}</th>
             <th st-sort="IsPublished" class="text-center sortable">{{::vm.translate.get('Is Published')}}</th>
             <th st-sort="CreatedOn" class="text-center sortable">{{::vm.translate.get('Created On')}}</th>
             <th class="text-center">{{::vm.translate.get('Actions')}}</th>
@@ -26,7 +26,7 @@
         <tr>
             <th>
                 <div class="form-group">
-                    <input class="form-control" st-search="Name"/>
+                    <input class="form-control" st-search="Name" />
                 </div>
             </th>
             <th>
@@ -63,6 +63,9 @@
             <th><st-date-range predicate="CreatedOn" before="query.before" after="query.after"></st-date-range></th>
             <th></th>
         </tr>
+        <tr>
+            <th ng-show="!vm.isLoading" colspan="10">{{vm.tableStateRef.pagination.totalItemCount | number:0}} records found</th>
+        </tr>
     </thead>
     <tbody ng-show="!vm.isLoading">
         <tr ng-repeat="product in vm.products">
@@ -72,7 +75,7 @@
             <td class="text-center"><i ng-attr-class="{{product.isFeatured && 'fa fa-circle' || 'fa fa-circle-o'}}"></i></td>
             <td class="text-center"><i ng-attr-class="{{product.isAllowToOrder && 'fa fa-circle' || 'fa fa-circle-o'}}"></i></td>
             <td class="text-center"><i ng-attr-class="{{product.isCallForPricing && 'fa fa-circle' || 'fa fa-circle-o'}}"></i></td>
-            <td class="text-center">{{product.stockQuantity}}</td>
+            <td class="text-right">{{product.stockQuantity}}</td>
             <td class="text-center"><i ng-attr-class="{{product.isPublished && 'fa fa-circle' || 'fa fa-circle-o'}}"></i></td>
             <td class="text-center">{{product.createdOn | date:'medium'}}</td>
             <td class="text-center">

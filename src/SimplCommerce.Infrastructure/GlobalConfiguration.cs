@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
+using SimplCommerce.Infrastructure.Localization;
+using SimplCommerce.Infrastructure.Modules;
 
 namespace SimplCommerce.Infrastructure
 {
     public static class GlobalConfiguration
     {
-        static GlobalConfiguration()
-        {
-            Modules = new List<ModuleInfo>();
-        }
+        public static IList<ModuleInfo> Modules { get; set; } = new List<ModuleInfo>();
 
-        public static IList<ModuleInfo> Modules { get; set; }
+        public static IList<Culture> Cultures { get; set; } = new List<Culture>();
+
+        public static string DefaultCulture => "en-US";
 
         public static string WebRootPath { get; set; }
 

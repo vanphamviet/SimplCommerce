@@ -8,7 +8,7 @@ namespace SimplCommerce.Module.News.Services
 {
     public class NewsCategoryService : INewsCategoryService
     {
-        private const long NewsCategoryEntityTypeId = 6;
+        private const string NewsCategoryEntityTypeId = "NewsCategory";
 
         private readonly IRepository<NewsCategory> _categoryRepository;
         private readonly IEntityService _entityService;
@@ -19,26 +19,26 @@ namespace SimplCommerce.Module.News.Services
             _entityService = entityService;
         }
 
-        public void Create(NewsCategory category)
+        public async Task Create(NewsCategory category)
         {
             using (var transaction = _categoryRepository.BeginTransaction())
             {
-                category.SeoTitle = _entityService.ToSafeSlug(category.SeoTitle, category.Id, NewsCategoryEntityTypeId);
+                category.Slug = _entityService.ToSafeSlug(category.Slug, category.Id, NewsCategoryEntityTypeId);
                 _categoryRepository.Add(category);
-                _categoryRepository.SaveChange();
+                await _categoryRepository.SaveChangesAsync();
 
-                _entityService.Add(category.Name, category.SeoTitle, category.Id, NewsCategoryEntityTypeId);
-                _categoryRepository.SaveChange();
+                _entityService.Add(category.Name, category.Slug, category.Id, NewsCategoryEntityTypeId);
+                await _categoryRepository.SaveChangesAsync();
 
                 transaction.Commit();
             }
         }
 
-        public void Update(NewsCategory category)
+        public async Task Update(NewsCategory category)
         {
-            category.SeoTitle = _entityService.ToSafeSlug(category.SeoTitle, category.Id, NewsCategoryEntityTypeId);
-            _entityService.Update(category.Name, category.SeoTitle, category.Id, NewsCategoryEntityTypeId);
-            _categoryRepository.SaveChange();
+            category.Slug = _entityService.ToSafeSlug(category.Slug, category.Id, NewsCategoryEntityTypeId);
+            _entityService.Update(category.Name, category.Slug, category.Id, NewsCategoryEntityTypeId);
+            await _categoryRepository.SaveChangesAsync();
         }
 
         public async Task Delete(long id)
@@ -51,7 +51,7 @@ namespace SimplCommerce.Module.News.Services
         {
             category.IsDeleted = true;
             await _entityService.Remove(category.Id, NewsCategoryEntityTypeId);
-            _categoryRepository.SaveChange();
+            _categoryRepository.SaveChanges();
         }
     }
 }

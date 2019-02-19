@@ -1,11 +1,18 @@
 ﻿using System;
-using System.Globalization;
+using System.Linq;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using SimplCommerce.Module.Core.Extensions;
-using Microsoft.AspNetCore.Hosting;
+using SimplCommerce.Infrastructure.Data;
+using SimplCommerce.Infrastructure;
+using SimplCommerce.Infrastructure.Localization;
+using SimplCommerce.Module.Localization;
 
 namespace SimplCommerce.WebHost.Extensions
 {
@@ -14,6 +21,29 @@ namespace SimplCommerce.WebHost.Extensions
         public static IApplicationBuilder UseCustomizedIdentity(this IApplicationBuilder app)
         {
             app.UseAuthentication();
+
+            app.UseWhen(
+                context => context.Request.Path.StartsWithSegments("/api"),
+                a => a.Use(async (context, next) =>
+                {
+                    var principal = new ClaimsPrincipal();
+
+                    var cookiesAuthResult = await context.AuthenticateAsync("Identity.Application");
+                    if (cookiesAuthResult?.Principal != null)
+                    {
+                        principal.AddIdentities(cookiesAuthResult.Principal.Identities);
+                    }
+
+                    var bearerAuthResult = await context.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
+                    if (bearerAuthResult?.Principal != null)
+                    {
+                        principal.AddIdentities(bearerAuthResult.Principal.Identities);
+                    }
+
+                    context.User = principal;
+                    await next();
+                }));
+
             return app;
         }
 
@@ -22,6 +52,10 @@ namespace SimplCommerce.WebHost.Extensions
             app.UseMvc(routes =>
             {
                 routes.Routes.Add(new UrlSlugRoute(routes.DefaultHandler));
+
+                routes.MapRoute(
+                    name: "areaRoute",
+                    template: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
                 routes.MapRoute(
                     "default",
@@ -69,24 +103,21 @@ namespace SimplCommerce.WebHost.Extensions
 
         public static IApplicationBuilder UseCustomizedRequestLocalization(this IApplicationBuilder app)
         {
-            var supportedCultures = new[]
+            using (var scope = app.ApplicationServices.CreateScope())
             {
-                new CultureInfo("en-US"),
-                new CultureInfo("vi-VN"),
-                new CultureInfo("fr-FR"),
-                new CultureInfo("pt-BR"),
-                new CultureInfo("uk-UA"),
-                new CultureInfo("ru-RU"),
-                new CultureInfo("ar-TN"),
-                new CultureInfo("ko-KR"),
-                new CultureInfo("tr-TR")
-            };
-            app.UseRequestLocalization(new RequestLocalizationOptions
-            {
-                DefaultRequestCulture = new RequestCulture("vi-VN", "vi-VN"),
-                SupportedCultures = supportedCultures,
-                SupportedUICultures = supportedCultures
-            });
+                var cultureRepository = scope.ServiceProvider.GetRequiredService<IRepositoryWithTypedId<Culture, string>>();
+                GlobalConfiguration.Cultures = cultureRepository.Query().ToList();
+            }
+
+            var supportedCultures = GlobalConfiguration.Cultures.Select(c => c.Id).ToArray();
+            app.UseRequestLocalization(options =>
+            options
+                .AddSupportedCultures(supportedCultures)
+                .AddSupportedUICultures(supportedCultures)
+                .SetDefaultCulture(GlobalConfiguration.DefaultCulture)
+                .RequestCultureProviders.Insert(0, new EfRequestCultureProvider())
+            );
+
             return app;
         }
     }

@@ -24,6 +24,9 @@
             // ng-upload will post null as text
             vm.category.parentId = vm.category.parentId === null ? '' : vm.category.parentId;
             vm.category.description = vm.category.description === null ? '' : vm.category.description;
+            vm.category.metaTitle = vm.category.metaTitle === null ? '' : vm.category.metaTitle;
+            vm.category.metaKeywords = vm.category.metaKeywords === null ? '' : vm.category.metaKeywords;
+            vm.category.metaDescription = vm.category.metaDescription === null ? '' : vm.category.metaDescription;
 
             if (vm.isEditMode) {
                 promise = categoryService.editCategory(vm.category);
@@ -66,20 +69,20 @@
             product.isEditing = true;
             product.editingIsFeaturedProduct = product.isFeaturedProduct;
             product.editingDisplayOrder = product.displayOrder;
-        }
+        };
 
         vm.saveProduct = function saveProduct(product) {
             var productCategory = {
-                'id' : product.id,
-                'isFeaturedProduct' : product.editingIsFeaturedProduct,
-                'displayOrder' : product.displayOrder
+                'id': product.id,
+                'isFeaturedProduct': product.editingIsFeaturedProduct,
+                'displayOrder': product.displayOrder
             };
             categoryService.saveProduct(productCategory).then(function () {
                 product.isEditing = false;
                 product.isFeaturedProduct = product.editingIsFeaturedProduct;
                 product.displayOrder = product.editingDisplayOrder;
             });
-        }
+        };
 
         function init() {
             if (vm.isEditMode) {

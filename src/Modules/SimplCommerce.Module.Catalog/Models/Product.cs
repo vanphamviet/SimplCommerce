@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using SimplCommerce.Module.Core.Models;
+using SimplCommerce.Module.Tax.Models;
 
 namespace SimplCommerce.Module.Catalog.Models
 {
     public class Product : Content
     {
+        [StringLength(450)]
         public string ShortDescription { get; set; }
 
         public string Description { get; set; }
@@ -32,10 +35,17 @@ namespace SimplCommerce.Module.Catalog.Models
 
         public bool IsAllowToOrder { get; set; }
 
-        public int? StockQuantity { get; set; }
+        public bool StockTrackingIsEnabled { get; set; }
 
+        public int StockQuantity { get; set; }
+
+        [StringLength(450)]
         public string Sku { get; set; }
 
+        [StringLength(450)]
+        public string Gtin { get; set; }
+
+        [StringLength(450)]
         public string NormalizedName { get; set; }
 
         public int DisplayOrder { get; set; }
@@ -56,6 +66,8 @@ namespace SimplCommerce.Module.Catalog.Models
 
         public IList<ProductCategory> Categories { get; protected set; } = new List<ProductCategory>();
 
+        public IList<ProductPriceHistory> PriceHistories { get; protected set; } = new List<ProductPriceHistory>();
+
         public int ReviewsCount { get; set; }
 
         public double? RatingAverage { get; set; }
@@ -63,6 +75,10 @@ namespace SimplCommerce.Module.Catalog.Models
         public long? BrandId { get; set; }
 
         public Brand Brand { get; set; }
+
+        public long? TaxClassId { get; set; }
+
+        public TaxClass TaxClass { get; set; }
 
         public void AddCategory(ProductCategory category)
         {
@@ -74,12 +90,6 @@ namespace SimplCommerce.Module.Catalog.Models
         {
             media.Product = this;
             Medias.Add(media);
-        }
-
-        public void RemoveMedia(ProductMedia media)
-        {
-            media.Product = null;
-            Medias.Remove(media);
         }
 
         public void AddAttributeValue(ProductAttributeValue attributeValue)
@@ -100,7 +110,7 @@ namespace SimplCommerce.Module.Catalog.Models
             ProductLinks.Add(productLink);
         }
 
-        public virtual IList<ProductOptionCombination> OptionCombinations { get; protected set; } = new List<ProductOptionCombination>();
+        public IList<ProductOptionCombination> OptionCombinations { get; protected set; } = new List<ProductOptionCombination>();
 
         public void AddOptionCombination(ProductOptionCombination combination)
         {
@@ -118,15 +128,28 @@ namespace SimplCommerce.Module.Catalog.Models
             product.ShortDescription = ShortDescription;
             product.Description = Description;
             product.Specification = Specification;
-            product.IsPublished = true;
-            product.PublishedOn = DateTimeOffset.Now;
+            product.IsPublished = IsPublished;
             product.Price = Price;
             product.OldPrice = OldPrice;
+            product.SpecialPrice = SpecialPrice;
+            product.SpecialPriceStart = SpecialPriceStart;
+            product.SpecialPriceEnd = SpecialPriceEnd;
+            product.HasOptions = HasOptions;
+            product.IsVisibleIndividually = IsVisibleIndividually;
+            product.IsFeatured = IsFeatured;
             product.IsAllowToOrder = IsAllowToOrder;
             product.IsCallForPricing = IsCallForPricing;
             product.StockQuantity = StockQuantity;
             product.BrandId = BrandId;
             product.VendorId = VendorId;
+            product.TaxClassId = TaxClassId;
+            product.StockTrackingIsEnabled = StockTrackingIsEnabled;
+            product.Sku = Sku;
+            product.Gtin = Gtin;
+            product.NormalizedName = NormalizedName;
+            product.DisplayOrder = DisplayOrder;
+            product.TaxClassId = TaxClassId;
+            product.Slug = Slug;
 
             foreach (var attribute in AttributeValues)
             {

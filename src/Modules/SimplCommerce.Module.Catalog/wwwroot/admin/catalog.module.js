@@ -129,6 +129,26 @@
                     url: '/widget-category/edit/:id',
                     templateUrl: 'modules/catalog/admin/category-widget/category-widget-form.html',
                     controller: 'CategoryWidgetFormCtrl as vm'
+                })
+                .state('widget-simple-product-create', {
+                    url: '/widget-simple-product/create',
+                    templateUrl: 'modules/catalog/admin/simple-product-widget/simple-product-widget-form.html',
+                    controller: 'SimpleProductWidgetFormCtrl as vm'
+                })
+                .state('widget-simple-product-edit', {
+                    url: '/widget-simple-product/edit/:id',
+                    templateUrl: 'modules/catalog/admin/simple-product-widget/simple-product-widget-form.html',
+                    controller: 'SimpleProductWidgetFormCtrl as vm'
+                })
+                .state('product-prices', {
+                    url: '/product-prices',
+                    templateUrl: 'modules/catalog/admin/product-price/product-price-form.html',
+                    controller: 'ProductPriceFormCtrl as vm'
+                })
+                .state('product-clone', {
+                    url: '/product-clone/:id',
+                    templateUrl: 'modules/catalog/admin/product-clone/product-clone-form.html',
+                    controller: 'ProductCloneFormCtrl as vm'
                 });
         }]);
 })();

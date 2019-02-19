@@ -1,79 +1,37 @@
-﻿@using System.Threading.Tasks
-@using Microsoft.AspNetCore.Localization
+﻿@using Microsoft.AspNetCore.Localization
+@using SimplCommerce.Infrastructure
+@using SimplCommerce.Module.Core.Extensions
+
 @inject IViewLocalizer Localizer
+@inject IWorkContext WorkContext
 
 @{
-    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
-
-    var availableCultures = new List<SelectListItem>
-    {
-        new SelectListItem
-        {
-            Value = "ar-TN",
-            Text = "Arabic"
-        },
-        new SelectListItem
-        {
-            Value = "en-US",
-            Text = "English"
-        },
-        new SelectListItem
-        {
-            Value = "vi-VN",
-            Text = "Vietnamese"
-        },
-        new SelectListItem
-        {
-            Value = "fr-FR",
-            Text = "French"
-        },
-        new SelectListItem
-        {
-            Value = "pt-BR",
-            Text = "Portuguese"
-        },
-        new SelectListItem
-        {
-            Value = "uk-UA",
-            Text = "Ukrainian"
-        },
-        new SelectListItem
-        {
-            Value = "ru-RU",
-            Text = "Russian"
-        },
-        new SelectListItem
-        {
-            Value = "ko-KR",
-            Text = "Korean"
-        },
-        new SelectListItem
-        {
-            Value = "tr-TR",
-            Text = "Turkish"
-        }
-    };
+    var uiCulture = Context.Features.Get<IRequestCultureFeature>().RequestCulture.UICulture.Name;
+    var selectedCulture = WorkContext.GetCurrentUser().Result.Culture;
 }
-<li class="dropdown">
-    <a href="#" class="ropdown-toggle" data-toggle="dropdown">
-        Language (@requestCulture.RequestCulture.UICulture.Name)
+
+@if (GlobalConfiguration.Cultures.Count() > 1)
+{
+<li class="nav-item dropdown">
+    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
+        Language (@uiCulture)
         <span class="caret"></span>
     </a>
     <ul class="dropdown-menu lang-selector">
-        @foreach (var lang in availableCultures)
+        @foreach (var culture in GlobalConfiguration.Cultures)
         {
-            if (lang.Value == requestCulture.RequestCulture.UICulture.Name)
-            {
-                <li><a href="#" data-value="@lang.Value">@lang.Text <span class="glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-            }
-            else
-            {
-                <li><a href="#" data-value="@lang.Value">@lang.Text</a></li>
-            }
+            <li class="dropdown-item">
+                <a href="#" data-value="@culture.Id">@culture.Name
+                @if (culture.Id == selectedCulture)
+                {
+                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                }
+                </a>
+            </li>
         }
     </ul>
-    <form asp-controller="Localization" asp-action="SetLanguage" asp-route-returnUrl="@Context.Request.Path"
-                method="post" id="lang-form" role="form">
-        <input type="hidden" name="culture" value="@requestCulture.RequestCulture.UICulture.Name" />
+    <form asp-area="Localization" asp-controller="Localization" asp-action="SetLanguage" asp-route-returnUrl="@Context.Request.Path" method="post" id="lang-form" role="form">
+        <input type="hidden" name="culture" value="@uiCulture" />
     </form>
 </li>
+}

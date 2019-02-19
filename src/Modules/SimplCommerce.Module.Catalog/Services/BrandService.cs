@@ -8,7 +8,7 @@ namespace SimplCommerce.Module.Catalog.Services
 {
     public class BrandService : IBrandService
     {
-        private const long BrandEntityTypeId = 2;
+        private const string BrandEntityTypeId = "Brand";
 
         private readonly IRepository<Brand> _brandRepository;
         private readonly IEntityService _entityService;
@@ -19,26 +19,26 @@ namespace SimplCommerce.Module.Catalog.Services
             _entityService = entityService;
         }
 
-        public void Create(Brand brand)
+        public async Task Create(Brand brand)
         {
             using (var transaction = _brandRepository.BeginTransaction())
             {
-                brand.SeoTitle = _entityService.ToSafeSlug(brand.SeoTitle, brand.Id, BrandEntityTypeId);
+                brand.Slug = _entityService.ToSafeSlug(brand.Slug, brand.Id, BrandEntityTypeId);
                 _brandRepository.Add(brand);
-                _brandRepository.SaveChange();
+                await _brandRepository.SaveChangesAsync();
 
-                _entityService.Add(brand.Name, brand.SeoTitle, brand.Id, BrandEntityTypeId);
-                _brandRepository.SaveChange();
+                _entityService.Add(brand.Name, brand.Slug, brand.Id, BrandEntityTypeId);
+                await _brandRepository.SaveChangesAsync();
 
                 transaction.Commit();
             }
         }
 
-        public void Update(Brand brand)
+        public async Task Update(Brand brand)
         {
-            brand.SeoTitle = _entityService.ToSafeSlug(brand.SeoTitle, brand.Id, BrandEntityTypeId);
-            _entityService.Update(brand.Name, brand.SeoTitle, brand.Id, BrandEntityTypeId);
-            _brandRepository.SaveChange();
+            brand.Slug = _entityService.ToSafeSlug(brand.Slug, brand.Id, BrandEntityTypeId);
+            _entityService.Update(brand.Name, brand.Slug, brand.Id, BrandEntityTypeId);
+            await _brandRepository.SaveChangesAsync();
         }
 
         public async Task Delete(long id)
@@ -51,7 +51,7 @@ namespace SimplCommerce.Module.Catalog.Services
         {
             brand.IsDeleted = true;
             await _entityService.Remove(brand.Id, BrandEntityTypeId);
-            _brandRepository.SaveChange();
+            _brandRepository.SaveChanges();
         }
     }
 }
